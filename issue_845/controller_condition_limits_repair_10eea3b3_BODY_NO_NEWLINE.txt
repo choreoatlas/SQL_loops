@@ -1,0 +1,41 @@
+## Controller #845/#806：保留原条件定义的 v0.2 producer 最小修复指针
+
+精确 base/main=`10eea3b396b5a62fbd580294a4d5f5bd4708dee6`，tree=`22800dce50f95103aa0181dd329447472f818654`。本条接续 #5987263071 的现场准备；只授权下述离线源码修复和候选验证。#5990645296 对旧精确宿主及独立 Expected 来源的接受保留原范围，并不证明这次发现的真实工作负载输入已经贯通。现场继续 HOLD，T0 连接预算为 0。
+
+### 已独立确认的问题及历史依据
+
+Controller 用未修改的 `issue_845_current_formal_facts_v0_2._assessment()` 和 `todo2_a1_v031_workload_binding_v0_1.VALIDATION_POLICIES` 的七项原始条件逐项复现：全部在 `845_PRODUCER_CONDITION_BINDING` 被拒。当前 producer 文件 SHA-256=`ba1e28b506396f026e86cd0d7e3580ba36e8ec53b473b7748419ae0083675e32`。
+
+原因是该检查要求 condition.limits 与整体 Function/context.limits 文本相等。原条件分别约束本地 SQLite、分页、布尔完成状态、硬删除、store reopen、浏览器资产/API 接线等；整体限制描述认证、多用户、远程同步、生产部署、崩溃恢复及跨浏览器不作保证。两者是不同层级的既有定义。
+
+历史 `issue_845_todo2_function_assessments_v0_2.py` 原样保留每项 condition，将整体 scope/limits 写入 assessment 行，并将原 condition 纳入 `assessment_basis_fingerprint`。未修改的 v0.3.1 校验器沿用这套绑定，未要求两层 limits 字符相同。#5978153785 明确要求保留七项业务 condition/claim、scope/limits 与支持拓扑。此前 owned05 合成正例把 condition.limits 写成整体限制，只证明其合成输入能够贯通，不能证明七项原始条件已经通过。
+
+### 最小修复边界
+
+允许 Code Relay 从上述精确 base 建立 `codex/` 候选，修正 v0.2 producer 对这两层限制的错误等同，补充必要文档与针对性测试。原 condition 定义必须完整保留，包括非空限制、condition ID/revision、claim、scope、支持集合；它继续绑定 reviewed request、policy 与 assessment 指纹。assessment 行、native/context、designation、FactBinding 和关系仍绑定整体 scope/limits；现有 condition.scope 检查和其它来源、修订、角色、指定、证据、本地上下文检查保持。
+
+禁止通过重写七项原条件、复制历史 judgment、修改正式包旧字节、放宽 v0.3.1 校验器或移除授权/来源检查解决。v0.1 入口、K2/K3/LoopDiscipline 内核、032/038/039、实际 A1 runner、CI 预算、冻结现场宿主均不在修改范围。若完整路径暴露另一项语义或来源矛盾，保留原始失败及到达层交回，不擅自扩大规则。
+
+外部纯数据准备工具可作相应机械适配，保留原完整 policy/condition、正确 source anchor 形状与原生/正式身份区分。它不能产出 Owner 授权、认证对象或来源证明；其候选输出须经过原 producer、assembler 和 v0.3.1 校验器检验。已有冻结 98 文件及旧宿主接受字节不得改写。
+
+### 必须交回的证据
+
+1. 七项原条件在 base 上被目标检查拒绝的复现；候选上完整保留原 policy/condition，经 v0.2 producer、正式组包和未修改的 v0.3.1 校验器形成一个完整合成候选。判断和外部 I/O 替身必须明确标记合成，禁止用测试中直接伪造的中途认证/准备对象跳过真实消费者。
+2. 对照表证明最终 policy 中原条件逐字保留；assessment 行仍是整体 scope/limits；指纹使用原条件且对其变更敏感；原生输入和历史材料没有被改写。不得只证明删除等值条件后函数不报错。
+3. 在适当的低成本规则层验证：缺失/空条件限制、错 condition revision/scope、变更已审查条件、错整体 native/context/designation 限制、来源/Owner 绑定错误均拒绝；保留 v0.1 回归。负例必须到达所声称规则层，不因上游不相关错误冒充通过。
+4. 交回 exact head/tree、完整 diff、测试原始结果与耗时、输入来源及未证明边界。最小必要测试即可，不逐项重复整套昂贵宿主流程。Controller 独立接受后再开 PR、核验 CI；合并仍由人执行。
+
+本条不启动真实 occurrence、prestart nonce、尝试槽位、K1/K3/A1 或数据库连接。新的源码与工具候选在合并后还需重新绑定受影响的现场准备；本修复本身不完成 #806。
+
+CONTROL_RECORD=v1
+KIND=BOUNDED_CONDITION_LIMITS_PRODUCER_REPAIR_POINTER
+SUBJECT=#845;PARENT=#806
+BASE_SHA=10eea3b396b5a62fbd580294a4d5f5bd4708dee6
+BASE_TREE=22800dce50f95103aa0181dd329447472f818654
+DEPENDS_ON=5978153785,5987263071,5990645296
+SUPERSEDES=none
+REAL_OCCURRENCE_AUTHORIZED=false
+DATABASE_CONNECTION_AUTHORIZED=false
+REAL_A1=false
+NEXT_GATE=EXACT_CANDIDATE_CONTROLLER_REVIEW
+AUTHORITY_EFFECT=bounded_offline_producer_repair_only
