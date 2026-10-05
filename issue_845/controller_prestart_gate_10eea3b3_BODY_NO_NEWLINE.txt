@@ -1,0 +1,38 @@
+## Controller #845/#806：持续宿主首次连接前 gate 的最小离线契约
+
+承接 [#5987263071](https://github.com/choreoatlas/close_loop_management/issues/845#issuecomment-5987263071)，绑定 main=`10eea3b396b5a62fbd580294a4d5f5bd4708dee6`、tree=`22800dce50f95103aa0181dd329447472f818654`。Code Relay 正确指出：原 R0 接受发生在观察之后，intake、assembly、source-review、K1 均在后续阶段，不能拿这些记录授权第一次连接。现有外部宿主若永远硬编码 HOLD，也无法完成上一指针要求的可达性。
+
+**裁定：允许在该外部 bundle 内，实现和离线验证一个版本化 prestart gate；复用现有 GitHub 评论鉴权与历史“直接 Owner 授权 → Controller App gate”模式。** 这是上一指针的启动权限检查细化，不设新的独立发行组件，不修改 K3/SQL/产品原 gate，也不接受任何实际现场 grant。旧 gate、离线指针或 caller 的 true 标志不能被解释为现场许可。未来接受记录的评论 ID/正文摘要由 gate 精确引用并回读，不回写已冻结 bundle，避免“接受记录必须先于自身候选”的循环。
+
+### 必须同时满足的谓词
+
+1. **先固定完整对象。** 新 gate 逐字节绑定候选的源码 SHA/tree、外部 bootstrap/launcher/wrapper/manifest 和全部运行输入摘要、完整 ExpectedPost039 摘要及独立来源审查记录、固定 route、SID/OID、Docker 部署身份、operator/readonly 角色和本机固定 journal 根身份。未冻结的后续 P/N 不伪装成已经存在；它们仍在原阶段生成、审查和绑定。具名启动动作严格为一次原 R0 只读观察、一次 preparation（两次 RR/RO 连接）及同一进程内至多一个零写入 occurrence；预算明列为 R0=1、preparation=2，不能挪给 W/R 或事后核验。
+2. **可信来源保持原规则。** Owner 必须是 #845 的 choreoatlas 直接人类评论，App 为 null；Controller gate 必须是 #845、同一仓库、未编辑且带现有规定的 App id/slug/owner。两者由既有原始评论鉴权函数验证，不以日志、缓存副本或本地文件代替 GitHub 原始回读。Owner 正文精确绑定该 prestart 对象、一次性 session nonce、session_started_at 和 expires_at；Controller gate 精确绑定 Owner 评论 ID、正文摘要、创建时间及同一对象，创建时间严格晚于 Owner。既有精确离线宿主接受及期望来源记录亦须绑定并验原件；其自身不提供连接权限。
+3. **新鲜、单次、不可复用。** 会话由宿主在无数据库接触时生成；窗口不得超过既有 24 小时宿主上限，实际每阶段还受原更短期限约束。Owner 与 App 评论均须在此窗口内且不早于本轮 challenge。输入漂移、评论编辑/错来源/错 issue、超时或一次验证失败均终止本宿主；不能换 nonce/评论/版本/source/根而复活旧目标尝试。不得预先填上未来 P、判断、回执或接受结果。
+4. **第一次数据库连接前持久占位。** 先完成固定 route/Docker 元数据、源与导入、输入、目录身份以及目标已有占用的只读检查，再消费有效的 prestart grant。复用原 R0 ARMED 回执或现有 AttemptJournal，在第一次 R0 连接前原子持久记录一次启动，占用键按固定目标计算，跨源码/版本/Owner 评论保持相同；不得选择新根绕过旧占用。原 preparation 自身的目标 claim 保持，二者须统一识别重复尝试。R0 失败或进程在 R0 与 preparation 之间退出，不能再次开始。回执仅是证据，不是活对象恢复凭据。
+5. **许可止于启动范围。** 未来 prestart 的精确正文明确 target_mutation=false、R1/K1/K3/A1/post-A1=false、retry=false。它仅在实际另行审核和人类授权后可放行上述三次只读连接与一个零写入 occurrence，不赋予治理判断、组包、W 锁、真实提交或事后连接权限。原 intake 与 assembly 的 Controller/Owner 节点、新 R0 接受、原 R1、source-review、K1 及独立事后 gate 全部保留；不得把多个不同决定合并成一个业务接受。
+
+### 实现与验证边界
+
+允许复用现有鉴权的通用严格 envelope/正文比对；不得给原鉴权添加宽松 fallback。prestart 的具名工厂须从真实原始评论形成进程内单次能力，主程序和可达公开启动方法都必须经过它；测试不能直接注入 seal 冒充这条路径。当前没有这样的有效评论时，实际入口应在任何连接/真实占用前拒绝，但候选代码须能消费未来按此契约发布的精确记录，无需另改代码才能继续。
+
+启动检查必须发生在首次产品模块导入之前，使用受绑定的最小 stdlib 外层；不扩大到恶意同 UID 持续篡改或新的 OS 隔离模型。同一进程保存各阶段 session 与 challenge，先交出原文、等待回复、再验证；原 operator coordinator 在持 W 锁后自行开展 R 观察和 K3，不在此前另消费一次 K1/读取。错误/乱序/重复命令、EOF、中断、超时、结果存储失败均终止，无静默恢复。
+
+在上一指针已有测试范围内增加前置反例：未知/旧/编辑/错来源评论、任意同名字段、超时、启动源漂移、错 route/Docker、已占用目标、R0 后崩溃重启，以及直接调用公开 start 的绕行。通过真实 gate 构造及真实顶层调度验证可达性；仍明确标注合成评论/材料和隔离 I/O。无任何真实评论可当作本轮 live grant，真实 T0/共享数据库预算仍为 0，真实根仍不得占用。
+
+其余 #5987263071 范围、停止条件、交回及独立验收要求不变。后续 Controller 必须先独立接受精确外部 bundle、完整原始证据及输入来源，再提交具体的人类启动授权正文；本条不替用户作 Owner 决定，不执行现场调用。
+
+CONTROL_RECORD=v1
+KIND=BOUNDED_PRESTART_GATE_OFFLINE_CONTRACT_CLARIFICATION
+SUBJECT=#845;PARENT=#806
+BINDS_SHA=10eea3b396b5a62fbd580294a4d5f5bd4708dee6
+BINDS_TREE=22800dce50f95103aa0181dd329447472f818654
+DEPENDS_ON=5987263071,5982841370
+SUPERSEDES=none
+OFFLINE_IMPLEMENTATION_AUTHORIZED=true
+EXACT_LIVE_GRANT_ACCEPTED=false
+REAL_DATABASE_CONNECTION_BUDGET=0
+REAL_OCCURRENCE_AUTHORIZED=false
+REAL_A1=false
+NEXT_GATE=EXACT_PERSISTENT_HOST_OFFLINE_CANDIDATE_REVIEW
+AUTHORITY_EFFECT=bounded_external_prestart_gate_offline_contract_and_implementation_only
